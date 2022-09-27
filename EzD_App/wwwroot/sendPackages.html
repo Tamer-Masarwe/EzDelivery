@@ -1,0 +1,312 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Send Packages</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/sendPackageStyle.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</head>
+<body onload="NavbarState(); ShowForm(); GetEmail()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container card text-white bg-secondary my-5 py-4 text-center">
+        <div class="card-body">
+            <p id="headTitle" style="font-size:25px;" class="text-white m-0">Please Enter Your Package Details</p>
+        </div>
+    </div>
+
+    <div style="text-align:center" class="container">
+        <form id="PackageForm" class="form-horizontal" method="post" action="/Home" onsubmit="SendPackage(); return false;">
+            <fieldset>
+
+                <!-- Select input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="IsForMe">The Shipping is for me</label>
+                    <div class="col-md-6">
+                        <div class="radio">
+                            <label onclick="CloseForm()" for="IsForMe-0">
+                                <input type="radio" name="IsForMe" id="IsForMe-0" value="Y">
+                                Yes
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label for="IsForMe-1">
+                                <input onclick="OpenForm()" type="radio" name="IsForMe" id="IsForMe-1" value="N" checked="checked">
+                                No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-popup" id="myForm">
+                    <!-- number input-->
+                    <div class="form-group row">
+                        <label class="col-md-6 col-form-label" for="SenderNum">Recipient Phone Number </label>
+                        <div class="col-md-6">
+                            <input id="RecipientNum" name="RecipientNum" type="text" pattern="[0]([0-9]{9})"
+                                   placeholder="Phone Number" class="form-control input-md" title="Incorrect Name">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- number input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="SenderNum">Sender's Phone Number </label>
+                    <div class="col-md-6">
+                        <input id="SenderNum" name="SenderNum" type="text" pattern="[0]([0-9]{9})" placeholder="Phone Number"
+                               class="form-control input-md" required title="invalid number">
+                    </div>
+                </div>
+                <!-- number input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="preferred_name">Weight </label>
+                    <div class="col-md-6">
+                        <input id="Weight" name="Weight" type="number" max="9999" min="1" step="0.1" placeholder="Weight - [KG]"
+                               class="form-control input-md" required>
+                    </div>
+                </div>
+                <!-- Date and time input -->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="date_of_birth">Shipping Date</label>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input id="ShippingDate" name="ShippingDate" class="form-control" onclick="MinimumShippingDate()"
+                                   type="date" placeholder="dd/mm/yyyy" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date input -->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="date_of_birth">Deadline Date</label>
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input id="Deadlinedate" name="Deadlinedate" class="form-control" onclick="MinimumDeadlinedate()"
+                                   type="date" placeholder="dd/mm/yyyy" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="RecipientName">Pick Up Address</label>
+                    <div class="col-md-2">
+                        <input id="cityPick" name="PickupAdress" type="text" pattern="[^'][A-Z a-z-]{1,20}" placeholder="City"
+                               class="form-control input-md" required="">
+                    </div>
+                    <div class="col-md-2">
+                        <input id="streetPick" name="PickupAdress" type="text" pattern="[^'][A-Z a-z-]{1,20}" placeholder="Street"
+                               class="form-control input-md" required="">
+
+                    </div>
+                    <div class="col-md-2">
+                        <input id="houseNumPick" name="PickupAdress" type="number" max="9999" min="0" pattern="^[1-9]\d*$"
+                               placeholder="House Number" class="form-control input-md" required="">
+
+                    </div>
+                </div>
+
+                <!-- Text input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="RecipientName">Drop Address</label>
+                    <div class="col-md-2">
+                        <input id="cityDrop" name="DropAddress" type="text" pattern="[^'][A-Z a-z-]{1,20}" placeholder="City"
+                               class="form-control input-md" required="">
+                    </div>
+                    <div class="col-md-2">
+                        <input id="streetDrop" name="DropAddress" type="text" pattern="[^'][A-Z a-z-]{1,20}" placeholder="Street"
+                               class="form-control input-md" required="">
+
+                    </div>
+                    <div class="col-md-2">
+                        <input id="houseNumDrop" name="DropAddress" type="number" max="9999" min="0" pattern="^[1-9]\d*$"
+                               placeholder="House Number" class="form-control input-md" required="">
+                    </div>
+                </div>
+
+                <!-- Text input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="RecipientName">Description</label>
+                    <div class="col-md-6">
+                        <input id="description" name="Description" type="text" pattern="[^'<>;]{1,100}"
+                               placeholder="Description" class="form-control input-md" required="">
+                    </div>
+                </div>
+
+                <!-- Number input-->
+                <div class="form-group row">
+                    <label class="col-md-6 col-form-label" for="RecipientName">Price</label>
+                    <div class="col-md-6">
+                        <input id="Price" name="Price" type="number" max="9999" min="1" placeholder="Price"
+                               class="form-control input-md" required="">
+                    </div>
+                </div>
+                <!-- Button -->
+                <div id="submitDiv" style="text-align:center" class="form-group row">
+                    <div class="col-md-12">
+                        <input type="submit" name="Save & Continue" value="Save & Continue" />
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function ShowForm() {
+            document.getElementById("headTitle").innerHTML = "Please Enter Your Package Details";
+            document.getElementById("PackageForm").style.display = "block";
+        }
+
+        function OpenForm() {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function CloseForm() {
+            document.getElementById("myForm").style.display = "none";
+        }
+
+        // Create a package according to the user inputs
+        function SendPackage() {
+
+            let isChecked;
+
+            if (document.getElementById("IsForMe-0").checked == true) {
+                isChecked = true;
+            }
+            else {
+                isChecked = false;
+            }
+
+            // Recieve package details from input fields
+            let packageDetails = {
+                SenderPhone: document.getElementById("SenderNum").value,
+                ContactPhone: document.getElementById("RecipientNum").value,
+                Weight: document.getElementById("Weight").value,
+                Description: document.getElementById("description").value,
+                FromAddress: {
+                    City: document.getElementById("cityPick").value,
+                    Street: document.getElementById("streetPick").value,
+                    HouseNum: document.getElementById("houseNumPick").value,
+                },
+                ToAddress: {
+                    City: document.getElementById("cityDrop").value,
+                    Street: document.getElementById("streetDrop").value,
+                    HouseNum: document.getElementById("houseNumDrop").value,
+                },
+                Price: document.getElementById("Price").value,
+                SenderIsReceiver: isChecked,
+                PickUpDate: document.getElementById("ShippingDate").value,
+                DeadLineDate: document.getElementById("Deadlinedate").value
+            }
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/AddPackage",
+                contentType: "application/json",
+                type: "POST",
+                data: JSON.stringify(packageDetails),
+                success: function (data) {
+                    document.getElementById("PackageForm").style.display = "none";
+                    document.getElementById("headTitle").innerHTML = "The Package Was Successfully Added!";
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                        alert("An error has occurred, please try again.");
+                    }
+            });
+        }
+
+        function MinimumShippingDate() {
+            let today = new Date();
+
+            let dd = today.getDate();
+            let mm = today.getMonth() + 1; // January is 0, therefore 1 has to be added
+            let yyyy = today.getFullYear();
+
+            if (dd < 10) {
+                dd = '0' + dd
+            }
+
+            if (mm < 10) {
+                mm = '0' + mm
+            }
+
+            today = yyyy + '-' + mm + '-' + dd;
+            document.getElementById("ShippingDate").setAttribute("min", today);
+        }
+
+        function MinimumDeadlinedate() {
+            let shippingDate = document.getElementById("ShippingDate").value;
+
+            if (!shippingDate) {
+                alert("Please fill shipping date first!");
+                return;
+            }
+
+            document.getElementById("Deadlinedate").setAttribute("min", shippingDate);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Delivery Profile</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+    <style>
+        h2 {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            margin: 40px 8px 10px 8px;
+            color: #cccccc;
+        }
+
+        h4 {
+            margin-bottom: .5rem;
+            font-weight: 500;
+            line-height: 1.2;
+            font-size: 1.5rem;
+        }
+
+        #profCon {
+            padding-bottom: 1rem !important;
+        }
+
+        .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+        .btn-primary, .btn-primary:disabled {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #868f8e;
+            border-color: #868f8e;
+        }
+
+        a {
+            color: #343a40;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: 400;
+        }
+    </style>
+
+</head>
+<body onload="NavbarState(); RenderComponents(); GetEmail()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="/myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container" id="profCon">
+        <h2>Manage your account</h2>
+        <h4>Change your account settings</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage/Email">Email</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage/ChangePassword">Password</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Personal.html">Personal Information</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/DeliveryProfile.html">Delivery Guy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-9">
+                <h4>Want to be a Delivery Guy?</h4>
+                <div id="updatedLine" class="alert alert-success" role="alert">
+                    <button type="button" class="close" onclick="RenderComponents()"><span>×</span></button>
+                    Your profile has been updated
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form id="profile-form" method="post" onsubmit="CreateDeliveryGuy() ;return false">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <div class="radio">
+                                        <label onclick="openForm()" for="Yes">
+                                            <input type="radio" name="IsForMe" id="Yes" value="Y">
+                                            Yes
+                                        </label>
+                                    </div>
+                                    <div class="radio">
+                                        <label for="No">
+                                            <input onclick="closeForm()" type="radio" name="IsForMe" id="No" value="N" checked="checked">
+                                            No
+                                        </label>
+                                    </div>
+                                    <div id="agreeDiv">
+                                        <br />
+                                        <span>
+                                            By clicking "I Agree", you will agree to the
+                                            <a href="#"><b>Terms & Conditions</b></a> of our company.
+                                        </span>
+                                        <br />
+                                        <input type="checkbox" id="agreeCB" onclick="UpdateSaveButton()" />
+                                        <label for="agreeCB">I Agree</label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12" id="historyLink">
+                                    <br />
+                                    <span>Click <a href="DeliveryHistory.html"><b><u>here</u></b></a> to see your deliveries history.</span>
+                                    <br />
+                                </div>
+                            </div>
+                            <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark footer_bottom">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function RenderComponents() {
+            document.getElementById("updatedLine").style.display = "none";
+            LoadInformation();
+        }
+
+        function LoadInformation() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/User/GetDeliveryGuy",
+                contentType: "application/json",
+                type: "GET",
+                //data: JSON.stringify(userData),
+                success: function (data) {
+
+                    if (data.Active) {
+                        document.getElementById("Yes").checked = true;
+                        document.getElementById("agreeDiv").style.display = "block";
+                        document.getElementById("agreeCB").checked = true;
+                    }
+                    else {
+                        document.getElementById("No").checked = true;
+                        document.getElementById("agreeDiv").style.display = "none";
+                        document.getElementById("agreeCB").checked = false;
+                    }
+                },
+                error:
+                    function (err) {
+                        console.log("in error");
+                        console.log(err);
+                    }
+            });
+        }
+
+        function openForm() {
+            document.getElementById("agreeDiv").style.display = "block";
+            UpdateSaveButton();
+        }
+
+        function closeForm() {
+            document.getElementById("agreeDiv").style.display = "none";
+            document.getElementById("update-profile-button").disabled = false;
+        }
+
+        function UpdateSaveButton() {
+            if (document.getElementById("agreeCB").checked == true) {
+                document.getElementById("update-profile-button").disabled = false;
+            }
+            else {
+                document.getElementById("update-profile-button").disabled = true;
+            }
+        }
+
+        function CreateDeliveryGuy()//when the save button pressed we should create DeliveryGuy object and insert it into the User object
+        {
+            if (document.getElementById("Yes").checked && document.getElementById("agreeCB").checked) {//create a DeliveryGuy
+                $.ajax({
+                    dataType: "json",
+                    url: "/api/User/CreateDeliveryGuy",
+                    contentType: "application/json",
+                    type: "PUT",
+                    //data: JSON.stringify(userData),
+                    success: function (data) {
+                        location.reload()
+                        document.getElementById("updatedLine").style.display = "block";
+                    },
+                    error:
+                        function (err) {
+                            console.log("in error");
+                            console.log(err);
+                        }
+                });
+            }
+            else if (document.getElementById("No").checked) {//Delete a DeliveryGuy
+                $.ajax({
+                    dataType: "json",
+                    url: "/api/User/SetDeliveryGuyInactive",
+                    contentType: "application/json",
+                    type: "DELETE",
+                    data: JSON.stringify(),
+                    success: function () {
+                        document.getElementById("updatedLine").style.display = "block";
+                    },
+                    error:
+                        function (err) {
+                            console.log(err);
+                        }
+                });
+            }
+
+            location.reload();
+        }
+    </script>
+</body>
+</html>

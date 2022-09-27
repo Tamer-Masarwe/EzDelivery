@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Delivery History</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/choosePackage.css" rel="stylesheet" />
+    <link href="css/MainPage.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+</head>
+<body onload="GetAllPackagesDeliveryGuyDid(); NavbarState(); GetEmail()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Call to Action Well -->
+
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+                <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="imgs/FinalLogo.png" alt="">
+            </div>
+            <div class="col-lg-5">
+                <h1 class="font-weight-light" id="mainTitle">Deliveries History</h1>
+            </div>
+        </div>
+
+        <div class="card text-white bg-secondary my-5 py-4 text-center" id="NoPackagesDiv">
+            <div class="card-body">
+                <p class="text-white m-0" style="font-size:25px">No history available!</p>
+            </div>
+        </div>
+
+
+        <!-- Content Row -->
+        <div id="allPackagesDiv" class="row">
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        //Get all packages of a specific delivery guy that have successfully arrived to the destination.
+        function GetAllPackagesDeliveryGuyDid() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/GetAllDonePackagesDelivered",
+                contentType: "application/json",
+                type: "POST",
+                success: function (packages) {
+                    if (packages.length < 1 || packages == null) {
+                        document.getElementById("NoPackagesDiv").style.display = "block";
+                        return;
+                    }
+                    document.getElementById("NoPackagesDiv").style.display = "none";
+                    document.getElementById("allPackagesDiv").innerHTML = packages.map(package =>
+                        `<div class="col-md-4 mb-5">
+                                <div id="myDiv${package.PackageID}" style="border-color:black" class="card h-100">
+                                    <div class="card-body">
+                                        <h2 class="card-title"><b>Package: #${package.PackageID}</b></h2>
+                                        <p class="card-text"><b>Sender Phone Number:</b> ${package.SenderPhone}</p>
+                                        <p class="card-text"><b>Contact Phone Number:</b> ${package.ContactPhone}</p>
+                                        <p class="card-text"><b>Weight:</b> ${package.Weight}</p>
+                                        <p class="card-text"><b>Description:</b> ${package.Description}</p>
+                                        <p class="card-text"><b>Shipping Date:</b> ${package.PickUpDate.slice(0, 10)}</p>
+                                        <p class="card-text"><b>Deadline Date:</b> ${package.DeadLineDate.slice(0, 10)}</p>
+                                        <p class="card-text"><b>Price:</b> ${package.Price}</p>
+                                        <p class="card-text"><b>From Address:</b> ${package.FromAddress.City},
+                                          ${package.FromAddress.Street}, ${package.FromAddress.HouseNum}</p>
+                                        <p class="card-text"><b>To Address:</b> ${package.ToAddress.City},
+                                          ${package.ToAddress.Street}, ${package.ToAddress.HouseNum}</p>
+                                    </div>
+                                </div>
+                            </div>`
+                    ).join('');
+                },
+                error:
+                    function (err) {
+
+                        console.log(err);
+                    }
+            });
+        }
+    </script>
+</body>
+</html>

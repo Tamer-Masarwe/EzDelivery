@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Personal</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+
+    <style>
+        h2 {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            margin: 40px 8px 10px 8px;
+            color: #cccccc;
+        }
+
+        h4 {
+            margin-bottom: .5rem;
+            font-weight: 500;
+            line-height: 1.2;
+            font-size: 1.5rem;
+        }
+
+        #profCon {
+            padding-bottom: 1rem !important;
+        }
+
+        .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+            .btn-primary:hover {
+                color: #fff;
+                background-color: #868f8e;
+                border-color: #868f8e;
+            }
+
+        a {
+            color: #343a40;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: 400;
+        }
+    </style>
+
+</head>
+<body onload="NavbarState(); GetEmail(); RenderComponents(); LoadInformation()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="/myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container" id="profCon">
+        <h2>Manage your account</h2>
+        <h4>Change your account settings</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage/Email">Email</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/Identity/Account/Manage/ChangePassword">Password</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/Personal.html">Personal Information</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/DeliveryProfile.html">Delivery Guy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-9">
+                <h4>Personal Information</h4>
+                <div id="updatedLine" class="alert alert-success" role="alert">
+                    <button type="button" class="close" onclick="RenderComponents()"><span>×</span></button>
+                    Your profile has been updated
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <form id="profile-form" method="post" onsubmit="UpdateInformation(); return false;">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label for="FirstName">First Name</label>
+                                <input id="FirstName" class="form-control" pattern="[A-Za-z].{1,}" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="LastName">Last Name</label>
+                                <input id="LastName" class="form-control" pattern="[A-Za-z].{1,}" required />
+                            </div>
+                            <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark footer_bottom">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function RenderComponents() {
+            document.getElementById("updatedLine").style.display = "none";
+        }
+
+        function UpdateInformation() {
+
+            var userDto = {
+                FirstName: document.getElementById("FirstName").value,
+                LastName: document.getElementById("LastName").value
+            };
+
+            $.ajax({
+                dataType: "json",
+                url: "api/User/UpdateUserName",
+                contentType: "application/json",
+                type: "POST",
+                data: JSON.stringify(userDto),
+                success: function (data) {
+                    if (data) {
+                        document.getElementById("updatedLine").style.display = "block";
+                    }
+                },
+                error:
+                    function (err) {
+                        console.log("in error");
+                        console.log(err);
+                    }
+            });
+        }
+
+        function LoadInformation() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/User/GetUserFirstLastName",
+                contentType: "application/json",
+                type: "POST",
+                //data: JSON.stringify(userData),
+                success: function (data) {
+                    console.log("success");
+                    document.getElementById("FirstName").value = data.FirstName;
+                    document.getElementById("LastName").value = data.LastName;
+                },
+                error:
+                    function (err) {
+                        console.log("in error");
+                        console.log(err);
+                    }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - My Deliveries</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/MainPage.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+
+    <style>
+        .btn-primary {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+            .btn-primary:hover {
+                color: #fff;
+                background-color: #868f8e;
+                border-color: #868f8e;
+            }
+    </style>
+
+</head>
+<body onload="NavbarState(); GetEmail(); GetRank()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="/myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Heading Row -->
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+                <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="imgs/FinalLogo.png" alt="">
+            </div>
+            <div class="col-lg-5">
+                <h1 class="font-weight-light" id="mainTitle">Deliveries Management</h1>
+                <br />
+                <span style="font-size:20px" class="font-weight-light rankStyle">Your Rank:  </span>
+                <span style="font-size:20px" id="YourRank" class="font-weight-light rankStyle">></span>
+                <br />
+                <span style="font-size:20px" class="font-weight-light rankStyle">Number Of Votes:  </span>
+                <span style="font-size:20px" id="NumOfVotes" class="font-weight-light rankStyle">></span>
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-md-4 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">Choose Package</h2>
+                        <p class="card-text">Click here in order to search for a package to deliver.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/choosePackage.html" class="btn btn-primary btn-sm">Choose</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.col-md-4 -->
+            <div class="col-md-4 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">History</h2>
+                        <p class="card-text">Watch your deliveries history.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/DeliveryHistory.html" class="btn btn-primary btn-sm">History</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.col-md-4 -->
+            <div class="col-md-4 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h2 class="card-title">Ongoing Deliveries</h2>
+                        <p class="card-text">Check your current deliveries and their status.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="OngoingDeliveries.html" class="btn btn-primary btn-sm">Check</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.col-md-4 -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function GetRank() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/User/GetDeliveryGuy",
+                contentType: "application/json; charset=utf-8",
+                type: "GET",
+                success: function (deliveryGuy) {
+                    let rank = document.getElementById("YourRank");
+                    rank.innerHTML = deliveryGuy.Rank.toFixed(1) + "/10";
+                    let numVotes = document.getElementById("NumOfVotes");
+                    numVotes.innerHTML = deliveryGuy.NumberOfVotes;
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - My Packages</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/MainPage.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+
+    <script>
+        var btn;
+        var PackageIDForAjax
+
+        function loadContent() {
+            //ask the myPackagesController to get the pckages list
+            strToLoad = "";
+            let StatusArray = ["Pending", "InProgress", "Done", "Error", "Cancel"];
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/GetAllPackages",
+                contentType: "application/json",
+                type: "GET",
+                success: function (packages) {
+                    strToAdd = "";
+
+                    if (packages.length == 0) {
+                        document.getElementById("NoPackagesDiv").style.display = "block";
+                    }
+                    else {
+                        document.getElementById("NoPackagesDiv").style.display = "none";
+                        objectToSend = [];
+
+                        for (var i = 0; i < packages.length; i++) {
+                            packages[i].PickUpDate = packages[i].PickUpDate.slice(0, 10);
+                            packages[i].DeadLineDate = packages[i].DeadLineDate.slice(0, 10);
+
+                            objectToSend[i] = packages[i];
+                            strToAdd += "<div class='col-md-4 mb-5 packageDiv'> <div class='card h-100'> <div class='card-body '>";
+                            strToAdd += "<h2 class='card-title' style='font-weight: bold'>Package: #" + packages[i].PackageID + "</h2>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Sender Phone Number:</span> " + packages[i].SenderPhone + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Contact Phone Number:</span> " + packages[i].ContactPhone + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Description:</span> " + packages[i].Description + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Weight:</span> " + packages[i].Weight + " Kg</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Shipping Date:</span> " + packages[i].PickUpDate + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Deadline Date:</span> " + packages[i].DeadLineDate + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Price: </span>" + packages[i].Price + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>From Address:</span> " + packages[i].FromAddress.City +
+                                ", " + packages[i].FromAddress.Street + ", " + packages[i].FromAddress.HouseNum + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>To Address:</span> " + packages[i].ToAddress.City +
+                                ", " + packages[i].ToAddress.Street + ", " + packages[i].ToAddress.HouseNum + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Status:</span> " + StatusArray[packages[i].Status] + "</p></div>";
+
+                            if (packages[i].Status == 0) {
+                                strToAdd += "<div class='card-footer'><input type='button' value='Edit' class='btn btn-primary btn-sm' onclick='Edit( objectToSend[" + i + "] )' /><input type='button' value='Delete' class='btn btn-primary btn-sm removeBtn' onclick='Delete( objectToSend[" + i + "] )' /><input type='button' value='Choose Delivery Guy' class='btn btn-primary btn-sm ChooseDeliveryGuyBtn' onclick='ChooseDeliveryGuy( objectToSend[" + i + "] )' /></div></div></div>";
+                            }
+                            else if (packages[i].Status == 2) {
+                                strToAdd += "<div class='card-footer'><input type='button' id='myBtn" + packages[i].PackageID + "' value='Rank Delivery Guy' class='btn btn-primary btn-sm ChooseDeliveryGuyBtn' onclick='RankDeliveryGuy( objectToSend[" + i + "] )' /></div></div></div>";
+                            }
+                            else {
+                                strToAdd += "<div class='card-footer'><input type='button' value='Edit' class='btn btn-primary btn-sm' disabled='disabled' onclick='Edit( objectToSend[" + i + "] )' /><input type='button' value='Delete' class='btn btn-primary btn-sm removeBtn' disabled='disabled' onclick='Delete( objectToSend[" + i + "] )' /><input type='button' value='Choose Delivery Guy' class='btn btn-primary btn-sm ChooseDeliveryGuyBtn' disabled='disabled' onclick='ChooseDeliveryGuy( objectToSend[" + i + "] )' /></div></div></div>";
+                            }
+
+                        }
+                    }
+
+                    document.getElementById("allUserPackagesDiv").innerHTML = strToAdd;
+                    GetAllVotes();
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function Edit(packageToEdit) {
+
+            try {
+                window.location.href = "EditPackage.html?package=" + packageToEdit.PackageID;
+                sessionStorage.setItem("packageToEdit", JSON.stringify(packageToEdit));
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+
+        function Delete(objectToRemove) {
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/DeletePackage/" + objectToRemove.PackageID,
+                contentType: "application/json",
+                type: "DELETE",
+                data: JSON.stringify(),
+                success: function (packages) {
+                    console.log("packages");
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+
+            setTimeout(loadContent, 800);
+        }
+
+        function ChooseDeliveryGuy(package) {
+            try {
+                window.location.href = "ChooseDeliveryGuy.html?packageid=" + package.PackageID;
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+
+        function RankDeliveryGuy(package) {
+            popUp(package.PackageID);
+        }
+
+        function popUp(packageID) {
+            // Get the modal
+            PackageIDForAjax = packageID;
+            var modal = document.getElementById("myModal");
+
+            // Get the button that opens the modal
+            btn = document.getElementById("myBtn" + packageID);
+            document.getElementById("packageID").innerHTML = "Package Number: " + packageID;
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close")[0];
+            btn.disabled = true;
+            modal.style.display = "block";
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function () {
+                btn.disabled = false;
+                modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        function GetAllVotes() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/ApprovedDelivery/GetAllVotes",
+                contentType: "application/json; charset=utf-8",
+                type: "GET",
+                success: function (votes) {
+                    for (let i = 0; i < votes.length; i++) {
+                        let btn = document.getElementById("myBtn" + votes[i].Package.PackageID);
+                        btn.value = "You ranked this delivery: " + votes[i].RankScore + "/10";
+                        btn.style.backgroundColor = "red";
+                        btn.style.borderColor = "red";
+                        btn.disabled = true;
+                   }
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+       }
+
+        //add Rank to deliveryGuy
+        function Send_Request() {
+            let rank = document.getElementById("Rank").value;
+            btn.value = "You ranked this delivery: " + rank + "/10";
+            btn.style.backgroundColor = "red";
+            btn.style.borderColor = "red";
+            document.getElementById("myModal").style.display = "none";
+            document.getElementById("Rank").value = "";
+
+            $.ajax({
+                dataType: "json",
+                url: `/api/ApprovedDelivery/AddDeliveryRank/${PackageIDForAjax}`,
+                contentType: "application/json; charset=utf-8",
+                type: "PUT",
+                data: JSON.stringify(rank),
+                success: function (data) {
+                    GetAllVotes();
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function SearchFunction() {
+            let input, filter, allPackagesDiv, packageDiv, h2, p, txtValue, h2Value;
+            let flag = false;
+
+            input = document.getElementById("myInput");
+            filter = input.value.toUpperCase();
+            allPackagesDiv = document.getElementById("allUserPackagesDiv");
+            packageDiv = allPackagesDiv.getElementsByClassName("packageDiv");
+
+            for (let i = 0; i < packageDiv.length; i++) {
+                p = packageDiv[i].getElementsByTagName("p");
+                h2 = packageDiv[i].getElementsByTagName("h2")[0];
+                h2Value = h2.textContent || h2.innerText;
+
+                if (h2Value.toUpperCase().indexOf(filter) > -1) {
+                    flag = true;
+                }
+
+                for (let j = 0; j < p.length; j++) {
+                    txtValue = p[j].textContent || p[j].innerText;
+
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        flag = true;
+                    }
+                }
+
+                if (flag) {
+                    packageDiv[i].style.display = "";
+                }
+                else {
+                    packageDiv[i].style.display = "none";
+                }
+
+                flag = false;
+            }
+        }
+    </script>
+    <style>
+        #titles {
+            font-weight: bold;
+        }
+
+        .removeBtn, .ChooseDeliveryGuyBtn {
+            margin-left: 4%;
+        }
+
+        .btn-primary, .btn-primary:disabled {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #868f8e;
+            border-color: #868f8e;
+        }
+
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #myInput {
+            margin-top: 5%;
+            background-position: 10px 12px;
+            background-repeat: no-repeat;
+            width: 100%;
+            font-size: 16px;
+            padding: 12px 20px 12px 40px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
+        }   
+    </style>
+</head>
+
+<body onload="NavbarState(); loadContent(); GetEmail()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="/myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="myModal" class="modal">
+        <form class="modal-content" onsubmit="Send_Request(); return false">
+            <span id="packageID"></span>
+            <h1 id="RankDelivery">Rank Delivery Guy: </h1>
+            <input id="Rank" name="Rank" type="number" max="10" min="1" placeholder="10 good | 1 bad"
+                   class="form-control input-md" required="">
+            <br />
+            <input id="saveAndContinue" class="btn-primary" type="submit" name="Save & Continue" value="Save & Continue" />
+            <span class="close">&times;</span>
+        </form>
+    </div>
+
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Heading Row -->
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+                <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="imgs/FinalLogo.png" alt="">
+            </div>
+            <div class="col-lg-5">
+                <h1 class="font-weight-light" id="mainTitle">My Packages</h1>
+                <input type="text" id="myInput" onkeyup="SearchFunction()" placeholder="Search for packages..">
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="card text-white bg-secondary my-5 py-4 text-center" id="NoPackagesDiv">
+            <div class="card-body">
+                <p class="text-white m-0" style="font-size:25px">You don't have any packages!</p>
+            </div>
+        </div>
+        <!-- Call to Action Well -->
+        <!-- Content Row -->
+        <div class="row" id="allUserPackagesDiv">
+        </div>
+        <!-- /.row -->
+    </div>
+
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+        <!-- /.container -->
+    </footer>
+</body>
+</html>

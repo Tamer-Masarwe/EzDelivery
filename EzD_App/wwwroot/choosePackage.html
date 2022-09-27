@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Choose Packages</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/choosePackage.css" rel="stylesheet" />
+    <link href="css/MainPage.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+    <style>       
+        #myInput {
+            margin-top:5%;
+            background-position: 10px 12px;
+            background-repeat: no-repeat;
+            width: 100%;
+            font-size: 16px;
+            padding: 12px 20px 12px 40px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
+        }           
+    </style>
+</head>
+
+<body onload="GetAllPendingPackages(); NavbarState(); GetEmail()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <form class="modal-content" onsubmit="Send_Request(); return false">
+            <span id="packageID"></span>
+            <h1 id="bidTitle">Enter Your Bid</h1>
+            <input id="RQprice" name="Price" type="number" max="9999" min="1" placeholder="Enter Your Bid"
+                   class="form-control input-md" required="">
+            <br />
+            <input id="RQdComments" name="Comments" type="text" pattern="[^'<>;]{1,100}"
+                   placeholder="Write Comments:" class="form-control input-md" required="">
+            <br />
+            <input id="saveAndContinue" class="btn-primary" type="submit" name="Save & Continue" value="Save & Continue" />
+            <span class="close">&times;</span>
+        </form>
+    </div>
+
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Call to Action Well -->
+
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+                <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="imgs/FinalLogo.png" alt="">
+            </div>
+            <div class="col-lg-5">
+                <h1 class="font-weight-light" id="mainTitle">Choose Package</h1>
+                <input type="text" id="myInput" onkeyup="SearchFunction()" placeholder="Search for packages..">
+            </div>
+        </div>
+
+        <!-- Content Row -->
+        <div id="allPackagesDiv" class="row">
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        var btn;
+        var myComment;
+        var myDiv;
+        var myDeleteRequest;
+        var deliveryProposalList = new Array();
+
+        //Get all of the packages with "Pending" status, without packages the were made by the user
+        function GetAllPendingPackages() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/GetAllPendingPackages",
+                contentType: "application/json",
+                type: "POST",
+                success: function (packages) {
+                    document.getElementById("allPackagesDiv").innerHTML = packages.map(package =>
+                        `<div class="col-md-4 mb-5 packageDiv">
+                                <div id="myDiv${package.PackageID}" style="border-color:black" class="card h-100">
+                                    <div class="card-body">
+                                        <h2 class="card-title"><b>Package: #${package.PackageID}</b></h2>
+                                        <p class="card-text"><b>Sender Phone Number:</b> ${package.SenderPhone}</p>
+                                        <p class="card-text"><b>Contact Phone Number:</b> ${package.ContactPhone}</p>
+                                        <p class="card-text"><b>Weight:</b> ${package.Weight}</p>
+                                        <p class="card-text"><b>Description:</b> ${package.Description}</p>
+                                        <p class="card-text"><b>Shipping Date:</b> ${package.PickUpDate.slice(0, 10)}</p>
+                                        <p class="card-text"><b>Deadline Date:</b> ${package.DeadLineDate.slice(0, 10)}</p>
+                                        <p class="card-text"><b>Price:</b> ${package.Price}</p>
+                                        <p class="card-text"><b>From Address:</b> ${package.FromAddress.City},
+                                          ${package.FromAddress.Street}, ${package.FromAddress.HouseNum}</p>
+                                        <p class="card-text"><b>To Address:</b> ${package.ToAddress.City},
+                                          ${package.ToAddress.Street}, ${package.ToAddress.HouseNum}</p>
+                                    </div>
+                                    <div  class="card-footer">
+                                        <button class="btn btn-primary btn-sm" id="myBtn${package.PackageID}"
+                                            onclick="choosePackage(${package.PackageID},${package.SenderPhone},
+                                            ${package.ContactPhone},${package.Weight},'${package.Description}',
+                                            '${package.PickUpDate}','${package.DeadLineDate}',${package.Price},
+                                            '${package.FromAddress.City}', '${package.FromAddress.Street}',
+                                            ${package.FromAddress.HouseNum},'${package.ToAddress.City}',
+                                            '${package.ToAddress.Street}',${package.ToAddress.HouseNum},
+                                            ${package.SenderIsReceiver},${package.Owner})">Choose Package
+                                        </button>
+                                        <p id="myComment${package.PackageID}"</p>
+                                        <p id="myDeleteRequestBtn${package.PackageID}"
+                                            onclick="DeleteDeliveryProposal(${package.PackageID})" style="visibility:hidden"
+                                            class="btn btn-primary btn-sm">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>`
+                    ).join('');
+
+                    getAllDeliveryProposal();
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function getAllDeliveryProposal() {
+            $.ajax({
+                dataType: "json",
+                url: "/api/DeliveryProposal/GetDeliveryProposalsByUser",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                success: function (data) {
+                    deliveryProposalList = data;
+
+                    for (let i = 0; i < deliveryProposalList.length; i++) {
+                        let packageID = deliveryProposalList[i].Package.PackageID;
+
+                        btn = document.getElementById("myBtn" + packageID);
+                        myComment = document.getElementById("myComment" + packageID);
+                        myDeleteRequest = document.getElementById("myDeleteRequestBtn" + packageID);
+                        myDeleteRequest.style.visibility = "visible";
+                        btn.innerHTML = "Your Bid is: " + deliveryProposalList[i].Price;
+                        myComment.innerHTML = "Your Comment : " + deliveryProposalList[i].Comment;
+
+                        btn.style.backgroundColor = "red";
+                        btn.style.borderColor = "red";
+
+                        myDeleteRequest.innerHTML = "Delete Request";
+                        btn.disabled = true;
+                    }
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function DeleteDeliveryProposal(packageID) {
+            let deliveryProposalID;
+
+            for (let i = 0; i < deliveryProposalList.length; i++) {
+                if (deliveryProposalList[i].Package.PackageID == packageID) {
+                    deliveryProposalID = deliveryProposalList[i].ProposalID;
+                }
+            }
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/DeliveryProposal/DeleteDeliveryProposal/",
+                contentType: "application/json; charset=utf-8",
+                type: "DELETE",
+                data: JSON.stringify(deliveryProposalID),
+                success: function (data) {
+                    console.log(data);
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+
+            setTimeout(GetAllPendingPackages, 800);
+        }
+
+        var packageDetails;
+
+        function choosePackage(PackageID, SenderPhone, ContactPhone, Weight, Description,
+            PickUpDate, DeadLineDate, packagePrice, FromCity, fromStreet, fromHouseNum,
+            ToCity, ToStreet, toHouseNum, SenderIsReciver, Owner) {
+            popUp(PackageID, packagePrice);
+
+            // Set Package details
+            packageDetails = {
+                PackageID: PackageID,
+                SenderPhone: SenderPhone,
+                ContactPhone: ContactPhone,
+                Weight: Weight,
+                Description: Description,
+                FromAddress: {
+                    City: FromCity,
+                    Street: fromStreet,
+                    HouseNum: fromHouseNum,
+                },
+                ToAddress: {
+                    City: ToCity,
+                    Street: ToStreet,
+                    HouseNum: toHouseNum,
+                },
+                Price: packagePrice,
+                SenderIsReceiver: SenderIsReciver,
+                PickUpDate: PickUpDate,
+                DeadLineDate: DeadLineDate,
+                Owner: Owner
+            };
+        }
+
+        // Add a delivery guys proposal to data
+        function Send_Request() {
+            let Price = document.getElementById("RQprice").value;
+
+            btn.innerHTML = "Your Bid is: " + Price;
+            btn.style.backgroundColor = "red";
+            btn.style.borderColor = "red";
+            myDeleteRequest.style.visibility = "visible";
+            let Comments = document.getElementById("RQdComments").value;
+            myComment.innerHTML = "Your Comment : " + Comments;
+
+            myDeleteRequest.style.visibility = "visible";
+            document.getElementById("myModal").style.display = "none";
+
+            let proposalDetails = {
+                Package:
+                {
+                    PackageID: packageDetails.PackageID,
+                    SenderPhone: packageDetails.SenderPhone.toString(),
+                    ContactPhone: packageDetails.ContactPhone.toString(),
+                    Weight: packageDetails.Weight,
+                    Description: packageDetails.Description,
+                    FromAddress: packageDetails.FromAddress,
+                    ToAddress: packageDetails.ToAddress,
+                    Price: packageDetails.Price,
+                    SenderIsReceiver: packageDetails.SenderIsReciver,
+                    PickUpDate: packageDetails.PickUpDate,
+                    DeadLineDate: packageDetails.DeadLineDate,
+                    Owner: packageDetails.Owner
+                },
+                Price: Price,
+                Comment: Comments
+            }
+
+            document.getElementById("RQdComments").value = "";
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/DeliveryProposal/AddDeliveryProposal",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                data: JSON.stringify(proposalDetails),
+                success: function (data) {
+                    getAllDeliveryProposal();
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function popUp(packageID, SenderPrice) {
+            // Get the modal
+            var modal = document.getElementById("myModal");
+
+            // Get the button that opens the modal
+            btn = document.getElementById("myBtn" + packageID);
+            myComment = document.getElementById("myComment" + packageID);
+            myDiv = document.getElementById("myDiv" + packageID);
+            myDeleteRequest = document.getElementById("myDeleteRequestBtn" + packageID);
+
+            document.getElementById("packageID").innerHTML = "Package Number: " + packageID;
+            document.getElementById("RQprice").value = SenderPrice;
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close")[0];
+            btn.disabled = true;
+            myDiv.style.borderColor = "red";
+            myDeleteRequest.style.visibility = "visible";
+            myDeleteRequest.innerHTML = "Delete Request";
+            modal.style.display = "block";
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function () {
+                btn.disabled = false;
+                myDeleteRequest.style.visibility = "hidden";
+                modal.style.display = "none";
+                myDiv.style.borderColor = "black";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    btn.disabled = false;
+                    myDeleteRequest.style.visibility = "hidden";
+                    myDiv.style.borderColor = "black";
+                }
+            }
+        }
+
+        function SearchFunction() {
+            let input, filter, allPackagesDiv, packageDiv, h2, p, txtValue, h2Value;
+            let flag = false;
+
+            input = document.getElementById("myInput");
+            filter = input.value.toUpperCase();
+            allPackagesDiv = document.getElementById("allPackagesDiv");
+            packageDiv = allPackagesDiv.getElementsByClassName("packageDiv");
+
+            for (let i = 0; i < packageDiv.length; i++) {
+                p = packageDiv[i].getElementsByTagName("p");
+                h2 = packageDiv[i].getElementsByTagName("h2")[0];
+                h2Value = h2.textContent || h2.innerText;
+
+                if (h2Value.toUpperCase().indexOf(filter) > -1) {
+                    flag = true;
+                }
+
+                for (let j = 0; j < p.length; j++) {
+                    txtValue = p[j].textContent || p[j].innerText;
+
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        flag = true;
+                    }
+                }
+
+                if (flag) {
+                    packageDiv[i].style.display = "";
+                }
+                else {
+                    packageDiv[i].style.display = "none";
+                }
+
+                flag = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Login</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet" />
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/loginStyle.css" rel="stylesheet" />
+    <!--<script src="DBcheck.js"></script>--> 
+    <script>
+        function init() {          
+            console.log(Person); //just testing if there are people
+        }
+
+
+        function verifyInformation() {
+
+            var loginData = {
+                grant_type: 'password',
+                username: document.getElementById("login").value,
+                password: document.getElementById("password").value
+            };
+
+            fetch('http://localhost:56891/token/', {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: loginData
+            })
+                .then(response => response.json())
+                .then(data => console.log(data));
+
+            //$.ajax({
+            //    type: 'POST',
+            //    url: 'http://localhost:56891/token',
+            //    data: loginData
+            //}).done(function (data) {
+            //    console.log(data);
+            //    // Cache the access token in session storage.
+            //    sessionStorage.setItem("tokenKey", data.access_token);
+            //    sessionStorage.setItem("userName", data.userName);
+            //    $("#loginForm").submit();
+            //}).fail("error");
+
+            return false; //if true, will move to home.html.
+        }
+
+    </script>
+    
+</head>
+<body onload="init()">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">
+                            Login
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="registrationPage.html">Sign Up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contactUs.html">Contact Us</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <div class="wrapper fadeInDown">
+            <div id="formContent">
+                <!-- Tabs Titles -->
+                <!-- Icon -->
+                <div class="fadeIn first">
+                    <img src="imgs/FinalLogo.png" id="icon" alt="User Icon" />
+                </div>
+                <!-- Login Form onsubmit="return verifyInformation()-->
+                <form id="loginForm" method="post" action="home.html">
+                    <input type="email" id="login" class="fadeIn second" name="login" placeholder="E-Mail" required>
+                    <input type="password" id="password" class="fadeIn third" name="login" placeholder="Password" required>
+                    <input type="button" class="fadeIn fourth" value="Log In" onclick="verifyInformation()">
+                </form>
+                <!-- Remind Passowrd -->
+                <div id="formFooter">
+                    <a class="underlineHover" href="#">Forgot Password?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">Copyright &copy; Team TLORT &emsp; <a class="footer_a" href="aboutUs.html">About Us</a> &emsp; <a class="footer_a" href="contactUs.html">Contact Us</a></p>
+        </div>
+        <!-- /.container -->
+    </footer>
+
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

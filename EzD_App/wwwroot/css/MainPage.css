@@ -1,0 +1,13 @@
+﻿body {
+}
+
+#mainTitle, .rankStyle {
+    text-shadow: 3px 3px 5px #708090;
+}
+
+#infoDiv {
+    font-size: 18px;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-top:4%;
+}

@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "EZ Delivery - Contact Us";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Content -->
+<div class="container">
+    <!-- Heading Row -->
+    <div class="row align-items-center my-5">
+        <div class="col-lg-7">
+            <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="/imgs/FinalLogo.png" alt="">
+        </div>
+        <!-- /.col-lg-8 -->
+        <div class="col-lg-5">
+            <h1 class="font-weight-light" id="mainTitle">Contact Us</h1>
+        </div>
+        <!-- /.col-md-4 -->
+
+        <div style="text-align:center; margin-top:5%" class="container">
+            <form id="PackageForm" class="form-horizontal" method="post" action="/Home" onsubmit="return false;">
+                <fieldset>
+
+                    <div class="form-popup" id="myForm">
+                        <!-- number input-->
+                        <div class="form-group row">
+                            <label class="col-md-6 col-form-label" for="SenderNum">Mail </label>
+                            <div class="col-md-6">
+                                <input id="RecipientNum" name="RecipientNum" type="email" placeholder="Mail" class="form-control input-md" title="Incorrect Name">
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-popup" id="myForm">
+                        <!-- number input-->
+                        <div class="form-group row">
+                            <label class="col-md-6 col-form-label" for="SenderNum">Phone </label>
+                            <div class="col-md-6">
+                                <input id="RecipientNum" name="RecipientNum" type="text" pattern="[0]([0-9]{9})" placeholder="Phone Number" class="form-control input-md" title="Incorrect Name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text input-->
+                    <div class="form-group row">
+                        <label class="col-md-6 col-form-label" for="RecipientName">Message</label>
+                        <div class="col-md-6">
+                            <textarea id="description" name="Description" type="text" pattern="(?=.*[a-z -A-Z\d]).{1,300}" placeholder="Write a message here..." class="form-control input-md" required=""></textarea>
+                        </div>
+                    </div>
+                    <!-- Button -->
+                    <div id="submitDiv" style="text-align:center" class="form-group row">
+                        <div class="col-md-12">
+                            <input type="submit" name="Send" value="Send" />
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- -->

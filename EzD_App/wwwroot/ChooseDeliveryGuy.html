@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>EZ Delivery - Choose Delivery Guy</title>
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/small-business.css" rel="stylesheet">
+    <link href="css/MyStyle.css" rel="stylesheet" />
+    <link href="css/MainPage.css" rel="stylesheet" />
+    <link href="css/Loader.css" rel="stylesheet" />
+    <script src="scripts/NavbarState.js"></script>
+    <script src="scripts/Loading.js"></script>
+    <script>
+        function LoadContent() {
+            try {
+                var url_string = (window.location.href).toLowerCase();
+                var url = new URL(url_string);
+                var packageid = url.searchParams.get("packageid");
+            }
+            catch (err) {
+                console.log(err);
+            }
+
+            $.ajax({
+                dataType: "json",
+                url: "/api/DeliveryProposal/GetDeliveryGuysByPackageId",
+                contentType: "application/json",
+                type: "POST",
+                data: JSON.stringify(packageid),
+                success: function (DeliveryGuysList) {
+                    strToAdd = "";
+
+                    if (DeliveryGuysList.length == 0) {
+                        document.getElementById("NoDeliveryGuys").style.display = "block";
+                    }
+                    else {
+                        document.getElementById("NoDeliveryGuys").style.display = "none";
+                        objectToSend = [];
+                        for (var i = 0; i < DeliveryGuysList.length; i++) {
+                            objectToSend[i] = DeliveryGuysList[i];
+
+                            strToAdd += "<div class='col-md-4 mb-5'> <div class='card h-100'> <div class='card-body '>";
+                            strToAdd += "<h2 class='card-title' style='font-weight: bold'>Delivery Guy</h2>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Name:</span> " + DeliveryGuysList[i].FirstName + " " + DeliveryGuysList[i].LastName + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Rank:</span> " + DeliveryGuysList[i].IntrestedDeliveryGuy.Rank.toFixed(1) + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Number of Votes:</span> " + DeliveryGuysList[i].IntrestedDeliveryGuy.NumberOfVotes + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Phone:</span> " + DeliveryGuysList[i].PhoneNumber + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Price:</span> " + DeliveryGuysList[i].Price + "</p>";
+                            strToAdd += "<p class='card-text'><span id='titles'>Comment:</span> " + DeliveryGuysList[i].Comment + "</p>";
+                            strToAdd += "<div class='ChooseDeliveryGuyButton'><input type='button' value='Choose' class='btn btn-primary btn-sm' onclick='approveDeliveryProposal( objectToSend[" + i + "] )' /></div></div></div></div>";
+                        }
+                    }
+                    document.getElementById("allUserPackagesDiv").innerHTML = strToAdd;
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+        }
+
+        function Edit(packageToEdit) {
+            // here we should go to the add package page and insert the existed data
+            // into the right textbox and to make it editable for the user, we may save
+            // the package we want to edit i the local storage to be accessible on the destination page
+            sessionStorage.setItem("packageToEdit", JSON.stringify(packageToEdit));
+            window.location.href = "EditPackage.html";
+        }
+
+        function Delete(objectToRemove) {
+            $.ajax({
+                dataType: "json",
+                url: "/api/Package/DeletePackage/" + objectToRemove.PackageID,
+                contentType: "application/json",
+                type: "DELETE",
+                data: JSON.stringify(),
+                success: function (packages) {
+                    console.log("packages");
+                },
+                error:
+                    function (err) {
+                        console.log(err);
+                    }
+            });
+            setTimeout(loadContent, 800);
+        }
+
+        function approveDeliveryProposal(deliveryProposal) {
+            $.ajax({
+                dataType: "json",
+                url: "/api/ApprovedDelivery/ApproveDeliveryProposal",
+                contentType: "application/json",
+                type: "POST",
+                data: JSON.stringify(deliveryProposal),
+                success: function (data) {
+                    alert("Proposal Approved!");
+                    window.location.href = "myPackages.html";
+                },
+                error: function (err) {
+                    console.log(err);
+                }
+            });
+        }
+    </script>
+
+    <style>
+        #titles {
+            font-weight: bold;
+        }
+
+        .removeBtn, .ChooseDeliveryGuyBtn {
+            margin-left: 4%;
+        }
+
+        .btn-primary, .btn-primary:disabled {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #868f8e;
+            border-color: #868f8e;
+        }
+
+        .ChooseDeliveryGuyButton {
+            padding: .75rem 1.25rem;
+            border-top: 1px solid rgba(0,0,0,.125);
+        }
+    </style>
+
+</head>
+<body onload="LoadContent(); GetEmail(); NavbarState()">
+    <!-- Loader -->
+    <div class="loader"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">EZ Delivery</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sendPackages.html">Send Package</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myPackages.html">Packages</a>
+                    </li>
+                    <li class="nav-item" id="deliveries">
+                        <a class="nav-link" href="/myDeliveries.html">Deliveries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a id="profileName" class="nav-link" href="/Identity/Account/Manage"></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Heading Row -->
+        <div class="row align-items-center my-5">
+            <div class="col-lg-7">
+                <img id="logo" class="img-fluid rounded mb-4 mb-lg-0" src="imgs/FinalLogo.png" alt="">
+            </div>
+            <div class="col-lg-5">
+                <h1 class="font-weight-light" id="mainTitle">Choose Your Guy</h1>
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="card text-white bg-secondary my-5 py-4 text-center" id="NoDeliveryGuys">
+            <div class="card-body">
+                <p class="text-white m-0" style="font-size:25px">Waiting for delivery guy to choose your package</p>
+            </div>
+        </div>
+        <!-- Call to Action Well -->
+        <!-- Content Row -->
+        <div class="row" id="allUserPackagesDiv">
+
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container -->
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">
+                Copyright &copy; Team TLORT &nbsp;
+                <a class="footer_a" href="/Home/aboutUs">About Us</a> &nbsp;
+                <a class="footer_a" href="/Home/contactUs">Contact Us</a>
+            </p>
+        </div>
+        <!-- /.container -->
+    </footer>
+</body>
+</html>
